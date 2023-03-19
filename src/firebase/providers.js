@@ -1,4 +1,10 @@
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
 import { FirebaseAuth } from "./config";
 
 const googleProvider = new GoogleAuthProvider();
@@ -26,4 +32,74 @@ export const singInWithGoogle = async () => {
       errorMessage,
     };
   }
+};
+
+export const registerUserWithEmailPasswordName = async ({
+  email,
+  password,
+  displayName,
+}) => {
+  try {
+    const resp = await createUserWithEmailAndPassword(
+      FirebaseAuth,
+      email,
+      password
+    );
+
+    const { uid, photoURL } = resp.user;
+
+    await updateProfile(FirebaseAuth.currentUser, {
+      displayName,
+    });
+
+    return {
+      ok: true,
+      uid,
+      photoURL,
+      email,
+      displayName,
+    };
+  } catch (error) {
+    if (error.message.includes("email-already-in-use")) {
+      return { ok: false, errorMessage: "El email ya está en uso" };
+    }
+    return { ok: false, errorMessage: error.code };
+  }
+};
+
+export const loginWithEmailPassword = async ({ email, password }) => {
+  try {
+    const resp = await signInWithEmailAndPassword(
+      FirebaseAuth,
+      email,
+      password
+    );
+    const { uid, photoURL, displayName } = resp.user;
+
+    return {
+      ok: true,
+      // User info
+      uid,
+      photoURL,
+      displayName,
+    };
+  } catch (error) {
+    if (
+      error.message.includes("user-not-found") ||
+      error.message.includes("wrong-password")
+    ) {
+      return {
+        ok: false,
+        errorMessage: "El email o la contraseña son incorrectos",
+      };
+    }
+    return {
+      ok: false,
+      errorMessage: error.code,
+    };
+  }
+};
+
+export const logoutFirebase = async () => {
+  return await FirebaseAuth.signOut();
 };
