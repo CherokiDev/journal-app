@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { AuthLayout } from "../layout/AuthLayout";
 import { useForm } from "../../hooks/useForm";
-import { startCreatingUserWithEmailPassword as startCreatingUserWithEmailPassword } from "../../store/auth";
+import { startCreatingUserWithEmailPassword } from "../../store/auth";
 
 const formData = {
   email: "",
